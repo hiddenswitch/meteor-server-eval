@@ -5,6 +5,9 @@ Package.describe({
 Package.on_use(function(api) {
   api.use(['standard-app-packages'], ['client', 'server']);
 
+  // Support user id and facebook id
+  api.use(['accounts-password', 'accounts-facebook'], 'server');
+
   api.export('ServerEval');
 
   api.add_files('result_format.js', 'server');

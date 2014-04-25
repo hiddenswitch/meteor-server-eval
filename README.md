@@ -29,6 +29,16 @@ in fact it checks for a ROOT_URL set to something on localhost and logs an error
      - __'serverEval/clear'__
      - __'serverEval/execute'__
 
+*   Set permissions to use the console in a production environment
+    ```json
+    "permissions": {
+        "console": [
+            { "userId": "abcdefghijk" },
+            { "facebookId" : "100000000001"}
+        ]
+    }
+    ```
+
 ### Caveat
 
 *    Unfortunately, to use the package scope functionality you have to add following code snippet to your package:
