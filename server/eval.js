@@ -161,17 +161,18 @@ var evalExpression = function (expr, options) {
 
 Meteor.methods({
     'serverEval/Eval': function (expr, options) {
-        if (!allowed(this.userId)) {
-            return "Permission denied. Have you logged in? userId: " + this.userId;
-        }
-
         if (!expr || expr.length === 0) return;
 
         options = options || {};
         var pkg = options.package;
         var autocomplete = options.autocomplete;
+        var result_obj;
 
-        var result_obj = evalExpression(expr, options);
+        if (allowed(this.userId)) {
+            result_obj = evalExpression(expr, options);
+        } else {
+            result_obj = evalExpression("'Permission denied. Have you logged in? userId: " + this.userId +"';", options);
+        }
 
         _.extend(result_obj, options);
 
@@ -204,10 +205,6 @@ Meteor.methods({
         //console.timeEnd("insert new result time");
     },
     'serverEval/Execute': function (command, scope, args) {
-        if (!allowed(this.userId)) {
-            return "Permission denied. Have you logged in? userId: " + this.userId;
-        }
-
         if (!command || command.length < 2) return;
 
         args = args || [];
@@ -234,31 +231,38 @@ Meteor.methods({
             ServerEval._results.insert(result_obj);
         };
 
-        try {
-            if (typeof ServerEval.helpers[helper] === 'function') {
-                result = ServerEval.helpers[helper](scope, args, new_result);
-            } else {
-                result = executeCommand(helper, scope, args, new_result);
+        if (allowed(this.userId)) {
+            try {
+                if (typeof ServerEval.helpers[helper] === 'function') {
+                    result = ServerEval.helpers[helper](scope, args, new_result);
+                } else {
+                    result = executeCommand(helper, scope, args, new_result);
+                }
+                if (!result) {
+                    return; //async
+                }
+            } catch (e) {
+                //error in eval
+                result = e;
             }
-            if (!result) {
-                return; //async
-            }
-        } catch (e) {
-            //error in eval
-            result = e;
+        } else {
+            result = evalExpression("'Permission denied. Have you logged in? userId: " + this.userId +"';");
         }
+
         new_result(result);
     },
     'serverEval/Clear': function () {
         if (!allowed(this.userId)) {
-            return "Permission denied. Have you logged in? userId: " + this.userId;
+            ServerEval._results.insert(evalExpression("'Permission denied. Have you logged in? userId: " + this.userId +"';"));
+            return;
         }
 
         ServerEval._results.remove({});
     },
     'serverEval/RemoveWatch': function (id) {
         if (!allowed(this.userId)) {
-            return "Permission denied. Have you logged in? userId: " + this.userId;
+            ServerEval._results.insert(evalExpression("'Permission denied. Have you logged in? userId: " + this.userId +"';"));
+            return;
         }
 
         ServerEval._watch.remove({
