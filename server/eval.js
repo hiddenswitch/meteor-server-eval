@@ -1,5 +1,5 @@
 ServerEval = {
-    version: "0.5",
+    version: "0.6",
     helpers: {},
     results: function () {
         return ServerEval._results.find({}, {
@@ -162,7 +162,7 @@ var evalExpression = function (expr, options) {
 Meteor.methods({
     'serverEval/Eval': function (expr, options) {
         if (!allowed(this.userId)) {
-            return;
+            return "Permission denied. Have you logged in? userId: " + this.userId;
         }
 
         if (!expr || expr.length === 0) return;
@@ -205,7 +205,7 @@ Meteor.methods({
     },
     'serverEval/Execute': function (command, scope, args) {
         if (!allowed(this.userId)) {
-            return;
+            return "Permission denied. Have you logged in? userId: " + this.userId;
         }
 
         if (!command || command.length < 2) return;
@@ -251,14 +251,14 @@ Meteor.methods({
     },
     'serverEval/Clear': function () {
         if (!allowed(this.userId)) {
-            return;
+            return "Permission denied. Have you logged in? userId: " + this.userId;
         }
 
         ServerEval._results.remove({});
     },
     'serverEval/RemoveWatch': function (id) {
         if (!allowed(this.userId)) {
-            return;
+            return "Permission denied. Have you logged in? userId: " + this.userId;
         }
 
         ServerEval._watch.remove({
