@@ -24,10 +24,10 @@ in fact it checks for a ROOT_URL set to something on localhost and logs an error
      - __.execute(command, scope, args)__ execute helper (command) function with given arguments array or executes command with node child_process.exec (scope is used to execute in package folder)
 
 *    the .eval, .clear and .removeWatch functions are realized with it's corresponding Meteor.methods (same args):
-     - __'serverEvalEval'__
-     - __'serverEvalRemoveWatch'__
-     - __'serverEvalClear'__
-     - __'serverEvalExecute'__
+     - __'serverEval/Eval'__
+     - __'serverEval/RemoveWatch'__
+     - __'serverEval/Clear'__
+     - __'serverEval/Execute'__
 
 *   Set permissions to use the console in a production environment. An undefined or empty array permits no one to connect. Add null to this list to enable everyone to use the console.
 

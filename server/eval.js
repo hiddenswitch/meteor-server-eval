@@ -1,5 +1,5 @@
 ServerEval = {
-    version: "0.5.1",
+    version: "0.5",
     helpers: {},
     results: function () {
         return ServerEval._results.find({}, {
@@ -74,7 +74,7 @@ Meteor.startup(function () {
     //refresh watches
     var watches = ServerEval._watch.find().fetch();
     _.each(watches, function (watch) {
-        Meteor.call('serverEvalEval', watch.expr, {
+        Meteor.call('serverEval/Eval', watch.expr, {
             'package': watch.watch_scope,
             watch: true
         });
@@ -160,7 +160,7 @@ var evalExpression = function (expr, options) {
 };
 
 Meteor.methods({
-    'serverEvalEval': function (expr, options) {
+    'serverEval/Eval': function (expr, options) {
         if (!allowed(this.userId)) {
             return;
         }
@@ -203,7 +203,7 @@ Meteor.methods({
         }
         //console.timeEnd("insert new result time");
     },
-    'serverEvalExecute': function (command, scope, args) {
+    'serverEval/Execute': function (command, scope, args) {
         if (!allowed(this.userId)) {
             return;
         }
@@ -249,14 +249,14 @@ Meteor.methods({
         }
         new_result(result);
     },
-    'serverEvalClear': function () {
+    'serverEval/Clear': function () {
         if (!allowed(this.userId)) {
             return;
         }
 
         ServerEval._results.remove({});
     },
-    'serverEvalRemoveWatch': function (id) {
+    'serverEval/RemoveWatch': function (id) {
         if (!allowed(this.userId)) {
             return;
         }
