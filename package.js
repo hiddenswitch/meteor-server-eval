@@ -16,7 +16,4 @@ Package.on_use(function(api) {
   api.add_files('client/client.js', 'client');
   api.add_files('server/helpers.js', 'server');
   api.add_files('server/git_helpers.js', 'server');
-
-  api.add_files('helpers.js', 'server');
-  api.add_files('git_helpers.js', 'server');
 });
