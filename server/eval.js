@@ -45,7 +45,7 @@ Meteor.publish("server-eval-metadata", function () {
 
     updateMetadata();
     return ServerEval.metadata();
-});
+},{is_auto:true});
 
 ServerEval._watch = new Meteor.Collection("server-eval-watch");
 Meteor.publish("server-eval-watch", function () {
@@ -54,7 +54,7 @@ Meteor.publish("server-eval-watch", function () {
     }
 
     return ServerEval.watch();
-});
+},{is_auto:true});
 
 ServerEval._results = new Meteor.Collection("server-eval-results", {
     connection: null // not persistent
@@ -65,7 +65,7 @@ Meteor.publish("server-eval-results", function () {
     }
 
     return ServerEval.results();
-});
+},{is_auto:true});
 
 Meteor.startup(function () {
     //refresh watches
@@ -159,7 +159,6 @@ var evalExpression = function (expr, options) {
 Meteor.methods({
     'serverEvalEval': function (expr, options) {
         if (!allowed(this.userId)) {
-            throw new Meteor.Error(403, "Permission denied.");
             return;
         }
 
@@ -203,7 +202,6 @@ Meteor.methods({
     },
     'serverEvalExecute': function (command, scope, args) {
         if (!allowed(this.userId)) {
-            throw new Meteor.Error(403, "Permission denied.");
             return;
         }
 
@@ -250,7 +248,6 @@ Meteor.methods({
     },
     'serverEvalClear': function () {
         if (!allowed(this.userId)) {
-            throw new Meteor.Error(403, "Permission denied.");
             return;
         }
 
@@ -258,7 +255,6 @@ Meteor.methods({
     },
     'serverEvalRemoveWatch': function (id) {
         if (!allowed(this.userId)) {
-            throw new Meteor.Error(403, "Permission denied.");
             return;
         }
 
