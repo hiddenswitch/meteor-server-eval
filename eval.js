@@ -27,47 +27,83 @@ ServerEval = {
 	},
 	clear: function() {
 		Meteor.call('serverEval/clear');
-	}
+	},
+    allowed: function(id) {
+        // A user who isn't logged in can never use the console
+        if (_.isUndefined(id) ||
+            _.isUndefined(Meteor.settings) ||
+            _.isUndefined(Meteor.settings.permissions) ||
+            _.isUndefined(Meteor.settings.permissions.console) ||
+            !_.isArray(Meteor.settings.permissions.console)) {
+            return false;
+        }
+
+        // Get the facebook user id if it exists
+        var user = Meteor.users.findOne({_id: id, "services.facebook.id": {$exists: true}}, {fetch: {"services.facebook.id": 1}});
+        var fbId = null;
+        if (user != null) {
+            fbId = user.services.facebook.id;
+        }
+
+        // Does the console permissions list contain this id?
+        return (_.contains(Meteor.settings.permissions.console, id) ||
+            _.contains(Meteor.settings.permissions.console, fbId) ||
+            _.contains(Meteor.settings.permissions.console, null));
+    }
 };
 
 if (Meteor.isClient) {
 	ServerEval._metadata = new Meteor.Collection("server-eval-metadata");
-	Meteor.subscribe("server-eval-metadata");
+    Deps.autorun(function() {
+        Meteor.subscribe("server-eval-metadata");
+    });
 
 	ServerEval._watch = new Meteor.Collection("server-eval-watch");
-	Meteor.subscribe("server-eval-watch");
+    Deps.autorun(function() {
+        Meteor.subscribe("server-eval-watch");
+    });
 
 	ServerEval._results = new Meteor.Collection("server-eval-results");
-	Meteor.subscribe("server-eval-results");
+	Deps.autorun(function() {
+        Meteor.subscribe("server-eval-results");
+    });
 }
 
 if (Meteor.isServer) {
 	ServerEval._metadata = new Meteor.Collection("server-eval-metadata");
 	Meteor.publish("server-eval-metadata", function() {
-		updateMetadata();
+        if (!ServerEval.allowed(this.userId)) {
+            throw new Meteor.Error(403, "Permission denied.");
+            return;
+        }
+
+        updateMetadata();
 		return ServerEval.metadata();
-	}, {is_auto: true});
+	});
 
 	ServerEval._watch = new Meteor.Collection("server-eval-watch");
 	Meteor.publish("server-eval-watch", function() {
+        if (!ServerEval.allowed(this.userId)) {
+            throw new Meteor.Error(403, "Permission denied.");
+            return;
+        }
+
 		return ServerEval.watch();
-	}, {is_auto: true});
+	});
 
 	ServerEval._results = new Meteor.Collection("server-eval-results", {
 		connection: null // not persistent
 	});
 	Meteor.publish("server-eval-results", function() {
+        if (!ServerEval.allowed(this.userId)) {
+            throw new Meteor.Error(403, "Permission denied.");
+            return;
+        }
+
 		return ServerEval.results();
-	}, {is_auto: true});
+	});
 
 	Meteor.startup(function() {
-		//check for localhost to force dev development over production
-		if (__meteor_runtime_config__) {
-			if (__meteor_runtime_config__.ROOT_URL.indexOf('localhost') === -1) {
-				Log.error("FATAL ERROR: METEOR-SERVER-EVAL MUST NOT RUN IN PRODUCTION");
-			}
-		}
-
 		//refresh watches
 		var watches = ServerEval._watch.find().fetch();
 		_.each(watches, function(watch) {
@@ -158,6 +194,11 @@ if (Meteor.isServer) {
 
 	Meteor.methods({
 		'serverEval/eval': function(expr, options) {
+            if (!ServerEval.allowed(this.userId)) {
+                throw new Meteor.Error(403, "Permission denied.");
+                return;
+            }
+
 			if (!expr || expr.length === 0) return;
 
 			options = options || {};
@@ -197,6 +238,11 @@ if (Meteor.isServer) {
 			//console.timeEnd("insert new result time");
 		},
 		'serverEval/execute': function(command, scope, args) {
+            if (!ServerEval.allowed(this.userId)) {
+                throw new Meteor.Error(403, "Permission denied.");
+                return;
+            }
+
 			if (!command || command.length < 2) return;
 
 			args = args || [];
@@ -239,9 +285,19 @@ if (Meteor.isServer) {
 			new_result(result);
 		},
 		'serverEval/clear': function() {
+            if (!ServerEval.allowed(this.userId)) {
+                throw new Meteor.Error(403, "Permission denied.");
+                return;
+            }
+
 			ServerEval._results.remove({});
 		},
 		'serverEval/removeWatch': function(id) {
+            if (!ServerEval.allowed(this.userId)) {
+                throw new Meteor.Error(403, "Permission denied.");
+                return;
+            }
+
 			ServerEval._watch.remove({
 				_id: id
 			});

@@ -29,12 +29,13 @@ in fact it checks for a ROOT_URL set to something on localhost and logs an error
      - __'serverEval/clear'__
      - __'serverEval/execute'__
 
-*   Set permissions to use the console in a production environment
+*   Set permissions to use the console in a production environment. An undefined or empty array permits no one to connect. Add null to this list to enable everyone to use the console.
+
     ```json
     "permissions": {
         "console": [
-            { "userId": "abcdefghijk" },
-            { "facebookId" : "100000000001"}
+            "abcdefghijk",
+            "100000000001"
         ]
     }
     ```
