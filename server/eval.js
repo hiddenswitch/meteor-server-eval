@@ -12,6 +12,9 @@ ServerEval = {
         return ServerEval._metadata.find({
             version: this.version
         });
+    },
+    watch: function () {
+        return ServerEval._watch.find();
     }
 };
 
@@ -45,7 +48,7 @@ Meteor.publish("server-eval-metadata", function () {
 
     updateMetadata();
     return ServerEval.metadata();
-},{is_auto:true});
+}, {is_auto: true});
 
 ServerEval._watch = new Meteor.Collection("server-eval-watch");
 Meteor.publish("server-eval-watch", function () {
@@ -54,7 +57,7 @@ Meteor.publish("server-eval-watch", function () {
     }
 
     return ServerEval.watch();
-},{is_auto:true});
+}, {is_auto: true});
 
 ServerEval._results = new Meteor.Collection("server-eval-results", {
     connection: null // not persistent
@@ -65,7 +68,7 @@ Meteor.publish("server-eval-results", function () {
     }
 
     return ServerEval.results();
-},{is_auto:true});
+}, {is_auto: true});
 
 Meteor.startup(function () {
     //refresh watches
