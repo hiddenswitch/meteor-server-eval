@@ -17,16 +17,16 @@ ServerEval = {
 		return ServerEval._watch.find();
 	},
 	removeWatch: function(id) {
-		Meteor.call('serverEval/removeWatch', id);
+		Meteor.call('serverEvalRemoveWatch', id);
 	},
 	eval: function(expr, options) {
-		Meteor.call('serverEval/eval', expr, options);
+		Meteor.call('serverEvalEval', expr, options);
 	},
 	execute: function(command, args) {
-		Meteor.apply('serverEval/execute', command, args);
+		Meteor.apply('serverEvalExecute', command, args);
 	},
 	clear: function() {
-		Meteor.call('serverEval/clear');
+		Meteor.call('serverEvalClear');
 	},
     allowed: function(id) {
         // A user who isn't logged in can never use the console
@@ -107,7 +107,7 @@ if (Meteor.isServer) {
 		//refresh watches
 		var watches = ServerEval._watch.find().fetch();
 		_.each(watches, function(watch) {
-			Meteor.call('serverEval/eval', watch.expr, {
+			Meteor.call('serverEvalEval', watch.expr, {
 				'package': watch.watch_scope,
 				watch: true
 			});
@@ -193,7 +193,7 @@ if (Meteor.isServer) {
 	};
 
 	Meteor.methods({
-		'serverEval/eval': function(expr, options) {
+		'serverEvalEval': function(expr, options) {
             if (!ServerEval.allowed(this.userId)) {
                 throw new Meteor.Error(403, "Permission denied.");
                 return;
@@ -237,7 +237,7 @@ if (Meteor.isServer) {
 			}
 			//console.timeEnd("insert new result time");
 		},
-		'serverEval/execute': function(command, scope, args) {
+		'serverEvalExecute': function(command, scope, args) {
             if (!ServerEval.allowed(this.userId)) {
                 throw new Meteor.Error(403, "Permission denied.");
                 return;
@@ -284,7 +284,7 @@ if (Meteor.isServer) {
 			}
 			new_result(result);
 		},
-		'serverEval/clear': function() {
+		'serverEvalClear': function() {
             if (!ServerEval.allowed(this.userId)) {
                 throw new Meteor.Error(403, "Permission denied.");
                 return;
@@ -292,7 +292,7 @@ if (Meteor.isServer) {
 
 			ServerEval._results.remove({});
 		},
-		'serverEval/removeWatch': function(id) {
+		'serverEvalRemoveWatch': function(id) {
             if (!ServerEval.allowed(this.userId)) {
                 throw new Meteor.Error(403, "Permission denied.");
                 return;
