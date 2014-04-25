@@ -12,13 +12,11 @@ Package.on_use(function(api) {
       'accounts-facebook'
   ], ['client', 'server']);
 
-
-
-  api.add_files('result_format.js', 'server');
-  api.add_files('eval.js', ['client', 'server']);
-
-  api.add_files('helpers.js', 'server');
-  api.add_files('git_helpers.js', 'server');
+  api.add_files('server/result_format.js', 'server');
+  api.add_files('server/eval.js', 'server');
+  api.add_files('server/helpers.js', 'server');
+  api.add_files('server/git_helpers.js', 'server');
+  api.add_files('client/client.js', 'client')
 
   api.export('ServerEval', ['server', 'client']);
 });
